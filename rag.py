@@ -60,7 +60,7 @@ Answer:"""
 
 
 # ---------------------------------------------------------------------------
-# Step 1: Load documents (no langchain-community needed)
+# Step 1: Load documents 
 # ---------------------------------------------------------------------------
 def load_documents(file_path):
     print(f"Loading document: {file_path}")
@@ -90,7 +90,7 @@ def create_vector_store(docs):
     # chunk_size: max characters per chunk
     # chunk_overlap: characters repeated between neighbouring chunks, so a
     # sentence cut at a boundary still appears whole in one of them
-    splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     splits = splitter.split_documents(docs)
     print(f"Created {len(splits)} chunks")
 
@@ -128,11 +128,11 @@ def build_rag_chain(llm):
     return prompt | llm | StrOutputParser()
 
 
-def answer_with_rag(query, vectorstore, rag_chain):
+def retrieve_answer_with_rag(query, vectorstore, rag_chain):
     # Embed the question and fetch the TOP_K closest chunks.
     # We retrieve here (not inside the chain) so what we display on screen
     # is exactly what the LLM receives.
-    results = vectorstore.similarity_search_with_score(query, k=TOP_K)
+    results = vectorstore.similarity_search_with_score(query, k=3)
 
     # Chroma returns a DISTANCE: lower = closer match (not a percentage)
     print("\n--- Retrieved chunks (lower distance = closer match) ---")
@@ -181,5 +181,5 @@ if __name__ == "__main__":
             continue
 
         # Normal path: full RAG
-        response = answer_with_rag(query, vectorstore, rag_chain)
+        response = retrieve_answer_with_rag(query, vectorstore, rag_chain)
         print(f"\n--- RAG Response ---\n{response}")
